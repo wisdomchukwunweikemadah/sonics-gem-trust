@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — SGT Wallet</title>
+  <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+        <h2>Settings</h2>
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="theme-toggle">🌗</button>
+          <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+        </div>
+      </header>
+      <div class="page-content settings-grid">
+        <section class="glass settings-card">
+          <h3>Profile</h3>
+          <form id="profile-form">
+            <div class="form-group">
+              <label>Username</label>
+              <input class="form-control" id="settings-username" name="username" required />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input class="form-control" id="settings-email" disabled />
+            </div>
+            <div class="form-group">
+              <label>Wallet ID</label>
+              <p id="settings-wallet" class="wallet-id">—</p>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
+        </section>
+        <section class="glass settings-card">
+          <h3>Appearance</h3>
+          <p class="text-muted">Use the theme toggle in the header to switch Light, Dark, or AMOLED modes.</p>
+          <p class="text-muted" style="margin-top:1rem">Themes are saved in localStorage.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — SGT Wallet</title>
+  <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+        <h2>Admin Dashboard</h2>
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="theme-toggle">🌗</button>
+          <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="dashboard-grid">
+          <div class="glass stat-card"><p class="label">Users</p><p class="value" id="stat-users">0</p></div>
+          <div class="glass stat-card"><p class="label">Transactions</p><p class="value" id="stat-tx">0</p></div>
+          <div class="glass stat-card"><p class="label">Total Gems</p><p class="value" id="stat-gems">0</p></div>
+          <div class="glass stat-card"><p class="label">Total USSD</p><p class="value" id="stat-ussd">0</p></div>
+        </div>
+        <section class="glass" style="padding:1.5rem;margin-top:1.5rem">
+          <h3>Adjust Balance</h3>
+          <form id="balance-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1rem">
+            <input class="form-control" name="userId" placeholder="User UUID" required />
+            <input class="form-control" name="gemBalance" type="number" step="0.01" placeholder="New Gems" />
+            <input class="form-control" name="ussdBalance" type="number" step="0.01" placeholder="New USSD" />
+            <button type="submit" class="btn btn-primary">Update</button>
+          </form>
+        </section>
+        <section class="glass" style="padding:1.5rem;margin-top:1.5rem;overflow-x:auto">
+          <h3>All Users</h3>
+          <table class="admin-table">
+            <thead><tr><th>User</th><th>Email</th><th>Wallet</th><th>Gems</th><th>USSD</th><th>Role</th></tr></thead>
+            <tbody id="users-table"></tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

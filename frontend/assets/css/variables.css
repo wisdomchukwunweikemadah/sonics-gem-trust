@@ -1,0 +1,45 @@
+:root {
+  --primary: #00d4ff;
+  --secondary: #7c3aed;
+  --dark: #0f172a;
+  --light: #ffffff;
+  --success: #00ff99;
+  --danger: #ff4d4d;
+  --warning: #ffb020;
+  --muted: #94a3b8;
+
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.72);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-color: rgba(15, 23, 42, 0.08);
+  --glass-blur: 16px;
+  --shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+  --shadow-glow: 0 0 24px rgba(0, 212, 255, 0.25);
+  --sidebar-width: 260px;
+  --navbar-height: 64px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0b1220;
+  --bg-secondary: #111827;
+  --bg-card: rgba(17, 24, 39, 0.75);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="amoled"] {
+  --bg-primary: #000000;
+  --bg-secondary: #000000;
+  --bg-card: rgba(10, 10, 10, 0.9);
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+}

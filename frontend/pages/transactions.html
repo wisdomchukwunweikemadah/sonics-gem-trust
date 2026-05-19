@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transactions — SGT Wallet</title>
+  <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+        <h2>Transactions</h2>
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="theme-toggle">🌗</button>
+          <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="dashboard-grid">
+          <section class="glass" style="grid-column:span 8;padding:1.5rem">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center">
+              <select id="filter-type" class="form-control" style="width:auto">
+                <option value="">All types</option>
+                <option value="SEND">Send</option>
+                <option value="RECEIVE">Receive</option>
+                <option value="CONVERT">Convert</option>
+                <option value="BONUS">Bonus</option>
+              </select>
+              <button class="btn btn-outline btn-sm" id="btn-prev">Prev</button>
+              <span id="page-info">Page 1</span>
+              <button class="btn btn-outline btn-sm" id="btn-next">Next</button>
+              <input type="hidden" id="page-num" value="1" />
+            </div>
+            <table class="admin-table">
+              <thead>
+                <tr><th>Type</th><th>Amount</th><th>From</th><th>To</th><th>Status</th><th>Date</th></tr>
+              </thead>
+              <tbody id="tx-table-body"></tbody>
+            </table>
+          </section>
+          <section class="glass chart-section" style="grid-column:span 4">
+            <h3>Distribution</h3>
+            <canvas id="tx-trend-chart"></canvas>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/transactions.js"></script>
+</body>
+</html>

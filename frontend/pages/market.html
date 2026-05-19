@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market — SGT Wallet</title>
+  <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+        <h2>Market</h2>
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="theme-toggle">🌗</button>
+          <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="market-grid">
+          <article class="glass market-card float-card">
+            <h3>Gems → USSD</h3>
+            <p class="rate">100 : 1</p>
+            <p class="text-muted">Your Gems: <strong id="market-gems">0</strong></p>
+            <button class="btn btn-primary glow-btn" id="quick-convert-gems" style="margin-top:1rem">Convert to USSD</button>
+          </article>
+          <article class="glass market-card float-card">
+            <h3>USSD → Gems</h3>
+            <p class="rate">1 : 100</p>
+            <p class="text-muted">Your USSD: <strong id="market-ussd-bal">0</strong></p>
+            <button class="btn btn-primary glow-btn" id="quick-convert-ussd" style="margin-top:1rem">Convert to Gems</button>
+          </article>
+          <article class="glass market-card">
+            <h3>Simulation Notice</h3>
+            <p class="text-muted">All rates are virtual. No real currency or crypto is exchanged.</p>
+          </article>
+          <article class="glass market-card">
+            <h3>Transfer Trends</h3>
+            <p class="text-success">↗ Active users growing</p>
+            <p class="text-muted" style="margin-top:0.5rem">Portfolio-grade analytics on your dashboard.</p>
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <div class="modal-overlay" id="convert-ussd-modal">
+    <div class="glass modal">
+      <h3>Convert USSD → Gems</h3>
+      <p class="text-muted">1 USSD = 100 Gems</p>
+      <form id="convert-ussd-form">
+        <div class="form-group">
+          <label>USSD amount</label>
+          <input class="form-control" name="ussdAmount" type="number" min="0.01" step="0.01" required id="ussd-input" />
+        </div>
+        <p id="gems-preview" class="text-primary">≈ 0 Gems</p>
+        <div style="display:flex;gap:0.75rem;margin-top:1rem">
+          <button type="submit" class="btn btn-primary glow-btn">Convert</button>
+          <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="../assets/js/market.js"></script>
+</body>
+</html>

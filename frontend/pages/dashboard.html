@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — SGT Wallet</title>
+  <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+        <div>
+          <h2 style="font-size:1.1rem">Dashboard</h2>
+          <p class="text-muted" style="font-size:0.85rem" id="user-email">—</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="theme-toggle" title="Theme">🌗</button>
+          <img id="user-avatar" src="../assets/images/logo.svg" alt="Avatar" style="width:36px;height:36px;border-radius:50%;" />
+          <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="dashboard-grid">
+          <section class="glass wallet-hero float-card">
+            <p class="text-muted">Welcome back, <strong id="user-name">User</strong></p>
+            <p>Wallet ID <span class="wallet-id" id="wallet-id-display" title="Click to copy">—</span></p>
+            <div class="balance-row">
+              <div class="balance-item">
+                <p class="text-muted">Gems</p>
+                <p class="amount" id="gem-balance">0.00</p>
+              </div>
+              <div class="balance-item">
+                <p class="text-muted">USSD</p>
+                <p class="amount" id="ussd-balance">0.00</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="glass quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="actions-grid">
+              <button class="action-btn" id="btn-send">💎 Send Gems</button>
+              <button class="action-btn" id="btn-convert">⇄ Convert</button>
+              <a href="transactions.html" class="action-btn" style="text-decoration:none">📜 History</a>
+              <a href="market.html" class="action-btn" style="text-decoration:none">📈 Market</a>
+            </div>
+          </section>
+
+          <div class="glass stat-card">
+            <p class="label">Total Gems</p>
+            <p class="value" id="stat-gems">0</p>
+            <p class="change text-success">Virtual balance</p>
+          </div>
+          <div class="glass stat-card">
+            <p class="label">USSD Balance</p>
+            <p class="value" id="stat-ussd">0</p>
+            <p class="change text-muted">100 Gems = 1 USSD</p>
+          </div>
+          <div class="glass stat-card">
+            <p class="label">Rate</p>
+            <p class="value">100:1</p>
+            <p class="change text-muted">Conversion</p>
+          </div>
+          <div class="glass stat-card">
+            <p class="label">Status</p>
+            <p class="value">🟢 Live</p>
+            <p class="change text-success">Simulation</p>
+          </div>
+
+          <section class="glass chart-section">
+            <h3>Weekly Activity</h3>
+            <canvas id="activity-chart" height="120"></canvas>
+          </section>
+
+          <section class="glass recent-tx">
+            <h3>Recent Transactions</h3>
+            <div id="recent-transactions">
+              <div class="skeleton" style="height:48px;margin:0.5rem 0"></div>
+              <div class="skeleton" style="height:48px;margin:0.5rem 0"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="send-modal">
+    <div class="glass modal">
+      <h3>Send Gems</h3>
+      <form id="send-form">
+        <div class="form-group">
+          <label>Recipient Wallet ID</label>
+          <input class="form-control" name="recipientWalletId" required placeholder="SGT-XXXX-XXXX-XXXX" />
+        </div>
+        <div class="form-group">
+          <label>Amount (Gems)</label>
+          <input class="form-control" name="amount" type="number" min="0.01" step="0.01" required />
+        </div>
+        <div style="display:flex;gap:0.75rem;margin-top:1rem">
+          <button type="submit" class="btn btn-primary glow-btn">Send</button>
+          <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="convert-modal">
+    <div class="glass modal">
+      <h3>Convert Gems → USSD</h3>
+      <p class="text-muted">Rate: 100 Gems = 1 USSD</p>
+      <form id="convert-form">
+        <div class="form-group">
+          <label>Gems to convert</label>
+          <input class="form-control" id="convert-gems-input" name="gemsAmount" type="number" min="1" step="1" required />
+        </div>
+        <p id="convert-preview" class="text-primary">≈ 0.00 USSD</p>
+        <div style="display:flex;gap:0.75rem;margin-top:1rem">
+          <button type="submit" class="btn btn-primary glow-btn">Convert</button>
+          <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/wallet.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+</body>
+</html>

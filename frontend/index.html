@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sonic's Gem Trust — Virtual Wallet</title>
+  <link rel="icon" href="assets/images/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+  <style>
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(ellipse at 10% 20%, rgba(0, 212, 255, 0.2), transparent 50%),
+        radial-gradient(ellipse at 90% 80%, rgba(124, 58, 237, 0.2), transparent 50%),
+        var(--bg-primary);
+    }
+    .hero-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+    }
+    .hero-nav .brand { display: flex; align-items: center; gap: 0.75rem; font-weight: 800; font-size: 1.25rem; }
+    .hero-nav img { width: 40px; height: 40px; }
+    .hero-nav-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .hero-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.15; margin-bottom: 1rem; }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 2rem; max-width: 520px; }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .hero-card { padding: 2rem; animation: float 4s ease-in-out infinite; }
+    .features {
+      padding: 4rem 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .feature-card { padding: 1.5rem; text-align: center; }
+    .feature-card .icon { font-size: 2rem; margin-bottom: 1rem; }
+    .disclaimer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+    }
+    @media (max-width: 768px) {
+      .hero-content { grid-template-columns: 1fr; text-align: center; }
+      .hero p { margin-left: auto; margin-right: auto; }
+      .hero-btns { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <nav class="hero-nav container">
+      <div class="brand">
+        <img src="assets/images/logo.svg" alt="SGT" />
+        <span>SGT Wallet</span>
+      </div>
+      <div class="hero-nav-actions">
+        <button class="theme-toggle" id="theme-toggle" title="Toggle theme">🌗</button>
+        <a href="pages/login.html" class="btn btn-outline btn-sm">Login</a>
+        <a href="pages/register.html" class="btn btn-primary btn-sm glow-btn">Get Started</a>
+      </div>
+    </nav>
+
+    <div class="hero-content">
+      <div class="fade-in">
+        <h1>Your Premium <span>Virtual Gem</span> Wallet</h1>
+        <p>Sonic's Gem Trust — simulate sending Gems, converting to USSD, and tracking transactions in a beautiful fintech-grade dashboard. No real money involved.</p>
+        <div class="hero-btns">
+          <a href="pages/register.html" class="btn btn-primary glow-btn">Create Free Account</a>
+          <a href="pages/login.html" class="btn btn-outline">Sign In</a>
+        </div>
+        <p style="margin-top:1.5rem;font-size:0.9rem;">🎁 <strong>1,000 Gems</strong> signup bonus</p>
+      </div>
+      <div class="glass hero-card float-card">
+        <p class="text-muted">Total Balance</p>
+        <h2 style="font-size:2.5rem;margin:0.5rem 0;">💎 1,000.00 <small style="font-size:1rem;color:var(--muted);">Gems</small></h2>
+        <p style="color:var(--primary);font-family:monospace;">SGT-DEMO-WALLET</p>
+        <div style="display:flex;gap:1rem;margin-top:1.5rem;">
+          <span class="badge badge-success">Simulation</span>
+          <span class="badge badge-primary">Secure</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="features container">
+      <div class="glass feature-card slide-in">
+        <div class="icon">💎</div>
+        <h3>Send Gems</h3>
+        <p class="text-muted">Transfer virtual Gems instantly using Wallet ID.</p>
+      </div>
+      <div class="glass feature-card slide-in">
+        <div class="icon">⇄</div>
+        <h3>Convert to USSD</h3>
+        <p class="text-muted">100 Gems = 1 USSD. Convert anytime on the backend.</p>
+      </div>
+      <div class="glass feature-card slide-in">
+        <div class="icon">📊</div>
+        <h3>Analytics</h3>
+        <p class="text-muted">Charts, history, and real-time wallet insights.</p>
+      </div>
+      <div class="glass feature-card slide-in">
+        <div class="icon">🔐</div>
+        <h3>Secure Auth</h3>
+        <p class="text-muted">JWT, bcrypt, rate limiting, and email verification.</p>
+      </div>
+    </section>
+
+    <p class="disclaimer">⚠️ Simulation only — no real money or payment gateways are used.</p>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="assets/js/notifications.js"></script>
+  <script src="assets/js/theme.js"></script>
+</body>
+</html>
