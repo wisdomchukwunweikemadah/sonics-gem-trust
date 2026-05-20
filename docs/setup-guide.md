@@ -18,7 +18,7 @@ npm run db:generate
 npm run dev
 ```
 
-API runs at `http://localhost:5000`
+API runs at `https://dole-embolism-trustless.ngrok-free.dev/api`
 
 ## Frontend Setup
 
