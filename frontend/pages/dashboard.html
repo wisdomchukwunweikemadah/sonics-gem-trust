@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="sgt-api-base" content="https://dole-embolism-trustless.ngrok-free.dev/api" />
+  <script src="../assets/js/head-api.js?v=5"></script>
+
   <title>Dashboard — SGT Wallet</title>
   <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <link rel="stylesheet" href="../assets/css/dashboard.css" />
   <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <link rel="stylesheet" href="../assets/css/enhancements.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
 </head>
 <body>
@@ -88,6 +92,29 @@
               <div class="skeleton" style="height:48px;margin:0.5rem 0"></div>
             </div>
           </section>
+
+          <section class="glass feature-panel">
+            <div class="panel-header">
+              <h3>Daily Reward</h3>
+              <button class="btn btn-primary btn-sm" id="daily-reward-btn" type="button">Claim</button>
+            </div>
+            <p class="text-muted" id="streak-text">Login streak: 0 days</p>
+          </section>
+
+          <section class="glass feature-panel">
+            <h3>Your Badges</h3>
+            <div id="user-badges" class="badge-row"></div>
+          </section>
+
+          <section class="glass feature-panel activity-feed-panel">
+            <h3>Live Activity</h3>
+            <div id="live-activity-feed" class="activity-feed"></div>
+          </section>
+
+          <section class="glass feature-panel">
+            <h3>Leaderboard</h3>
+            <div id="leaderboard-list" class="leaderboard-list"></div>
+          </section>
         </div>
       </div>
     </main>
@@ -131,12 +158,15 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="../assets/js/notifications.js"></script>
-  <script src="../assets/js/theme.js"></script>
-  <script src="../assets/js/app.js"></script>
-  <script src="../assets/js/wallet.js"></script>
-  <script src="../assets/js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="../assets/js/runtime-config.js?v=5"></script>
+  <script src="../assets/js/env.generated.js?v=5"></script>
+  <script src="../assets/js/config.js?v=5"></script>
+  <script src="../assets/js/notifications.js?v=5"></script>
+  <script src="../assets/js/notifications.js?v=5"></script>
+  <script src="../assets/js/theme.js?v=5"></script>
+  <script src="../assets/js/sgt-wallet.js?v=5"></script>
+  <script src="../assets/js/wallet.js?v=5"></script>
+  <script src="../assets/js/dashboard.js?v=5"></script>
 </body>
 </html>

@@ -1,3 +1,5 @@
+let searchTimer = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth()) return;
 
@@ -17,9 +19,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'dashboard.html';
   }
 
+  document.getElementById('user-search')?.addEventListener('input', (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => loadAdminData(e.target.value.trim()), 300);
+  });
+
+  document.getElementById('gift-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = form.querySelector('[type="submit"]');
+    const amount = parseFloat(form.amount.value);
+    const walletId = form.walletId?.value || document.getElementById('gift-wallet-select')?.value;
+
+    if (!walletId) {
+      notify.error('Select a recipient');
+      return;
+    }
+    if (!amount || amount <= 0) {
+      notify.error('Enter a valid gem amount');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    try {
+      const res = await api('/admin/gift-gems', {
+        method: 'POST',
+        body: { walletId, amount, description: form.description?.value?.trim() || undefined },
+      });
+      notify.success(res.message || 'Gems gifted successfully');
+      form.reset();
+      loadAdminData();
+    } catch (err) {
+      notify.error(err.message);
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
   document.getElementById('balance-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
+    if (!form.userId.value) {
+      notify.error('Select a user');
+      return;
+    }
     try {
       await api('/admin/balance', {
         method: 'PATCH',
@@ -43,9 +86,47 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
-async function loadAdminData() {
+function populateUserSelects(users) {
+  const giftSelect = document.getElementById('gift-wallet-select');
+  const balanceSelect = document.getElementById('balance-user-select');
+  const giftOptions = users
+    .map(
+      (u) =>
+        `<option value="${u.walletId}">${u.username} (${u.walletId}) — ${formatNumber(u.wallet?.gemBalance)} G</option>`
+    )
+    .join('');
+  if (giftSelect) giftSelect.innerHTML = `<option value="">Select recipient</option>${giftOptions}`;
+  if (balanceSelect) {
+    balanceSelect.innerHTML = `<option value="">Select user</option>${users
+      .map((u) => `<option value="${u.id}">${u.username} — ${u.email}</option>`)
+      .join('')}`;
+  }
+}
+
+function renderAdminActivity(txs) {
+  const el = document.getElementById('admin-activity');
+  if (!el) return;
+  if (!txs?.length) {
+    el.innerHTML = '<p class="text-muted">No recent activity</p>';
+    return;
+  }
+  el.innerHTML = txs
+    .map(
+      (t) => `
+    <div class="feed-item">
+      <div class="feed-body">
+        <strong>${t.type}</strong> · ${formatNumber(t.amount)}
+        <p class="text-muted">${t.sender || '—'} → ${t.receiver || '—'} · ${formatDate(t.createdAt)}</p>
+      </div>
+    </div>`
+    )
+    .join('');
+}
+
+async function loadAdminData(search = '') {
+  const q = search ? `?search=${encodeURIComponent(search)}` : '';
   const [usersRes, statsRes] = await Promise.all([
-    api('/admin/users'),
+    api(`/admin/users${q}`),
     api('/admin/stats'),
   ]);
 
@@ -54,13 +135,15 @@ async function loadAdminData() {
   document.getElementById('stat-gems').textContent = formatNumber(statsRes.data.totalGems);
   document.getElementById('stat-ussd').textContent = formatNumber(statsRes.data.totalUssd);
 
-  const tbody = document.getElementById('users-table');
-  tbody.innerHTML = usersRes.data.users
+  populateUserSelects(usersRes.data.users);
+  renderAdminActivity(statsRes.data.recentTransactions);
+
+  document.getElementById('users-table').innerHTML = usersRes.data.users
     .map(
       (u) => `<tr>
       <td>${u.username}</td>
       <td>${u.email}</td>
-      <td><code>${u.walletId}</code></td>
+      <td><code class="wallet-id">${u.walletId}</code></td>
       <td>${formatNumber(u.wallet?.gemBalance)}</td>
       <td>${formatNumber(u.wallet?.ussdBalance)}</td>
       <td><span class="badge badge-primary">${u.role}</span></td>

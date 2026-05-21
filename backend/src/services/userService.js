@@ -1,6 +1,9 @@
+const fs = require('fs');
 const path = require('path');
 const { prisma } = require('../config/db');
 const { cloudinary, isConfigured } = require('../config/cloudinary');
+const { resolvePublicUrl } = require('../utils/mediaUrl');
+const { computeBadges } = require('./featuresService');
 const emailNotify = require('./emailNotificationService');
 
 const getProfile = async (userId) => {
@@ -14,6 +17,9 @@ const getProfile = async (userId) => {
       walletId: true,
       role: true,
       isEmailVerified: true,
+      bio: true,
+      loginStreak: true,
+      lastDailyReward: true,
       createdAt: true,
       wallet: {
         select: {
@@ -30,8 +36,12 @@ const getProfile = async (userId) => {
     throw err;
   }
 
+  const enriched = { ...user, wallet: user.wallet };
   return {
     ...user,
+    profileImage: resolvePublicUrl(user.profileImage),
+    badges: computeBadges(enriched),
+    canClaimDaily: !user.lastDailyReward || new Date(user.lastDailyReward).toDateString() !== new Date().toDateString(),
     wallet: user.wallet
       ? {
           gemBalance: Number(user.wallet.gemBalance),
@@ -41,7 +51,7 @@ const getProfile = async (userId) => {
   };
 };
 
-const updateProfile = async (userId, { username, profileImage }) => {
+const updateProfile = async (userId, { username, profileImage, bio }) => {
   const data = {};
   if (username) {
     const taken = await prisma.user.findFirst({
@@ -55,8 +65,9 @@ const updateProfile = async (userId, { username, profileImage }) => {
     data.username = username;
   }
   if (profileImage !== undefined) data.profileImage = profileImage;
+  if (bio !== undefined) data.bio = bio;
 
-  return prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id: userId },
     data,
     select: {
@@ -66,8 +77,20 @@ const updateProfile = async (userId, { username, profileImage }) => {
       profileImage: true,
       walletId: true,
       role: true,
+      bio: true,
+      loginStreak: true,
+      lastDailyReward: true,
+      isEmailVerified: true,
+      createdAt: true,
     },
   });
+
+  const enriched = { ...updated, wallet: await prisma.wallet.findUnique({ where: { userId } }) };
+  return {
+    ...updated,
+    profileImage: resolvePublicUrl(updated.profileImage),
+    badges: computeBadges(enriched),
+  };
 };
 
 const uploadProfileImage = async (userId, filePath) => {
@@ -85,12 +108,15 @@ const uploadProfileImage = async (userId, filePath) => {
 
   const user = await updateProfile(userId, { profileImage: profileImageUrl });
 
+  if (isConfigured && filePath && fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (_) {}
+  }
+
   const fullUser = await prisma.user.findUnique({ where: { id: userId } });
   if (fullUser) {
-    const imageUrl = profileImageUrl.startsWith('http')
-      ? profileImageUrl
-      : `${process.env.API_PUBLIC_URL || 'http://localhost:5000'}${profileImageUrl}`;
-
+    const imageUrl = resolvePublicUrl(profileImageUrl);
     emailNotify.sendProfilePictureEmail(fullUser, imageUrl).catch((e) =>
       console.error('[Mail] Profile picture:', e.message)
     );

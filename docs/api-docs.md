@@ -1,6 +1,6 @@
 # SGT Wallet API Documentation
 
-Base URL: `http://localhost:5000/api`
+Base URL: `http://localhost:5001/api` (local) or your ngrok URL + `/api` (production)
 
 All protected routes require header: `Authorization: Bearer <token>`
 

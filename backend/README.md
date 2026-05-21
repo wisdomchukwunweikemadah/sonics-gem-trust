@@ -21,4 +21,4 @@ UPDATE "User" SET role = 'ADMIN' WHERE email = 'your@email.com';
 
 ## API Base
 
-`http://localhost:5000/api`
+`https://dole-embolism-trustless.ngrok-free.dev/api`

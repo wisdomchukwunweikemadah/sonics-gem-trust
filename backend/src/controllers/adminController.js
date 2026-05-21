@@ -3,7 +3,7 @@ const { sendSuccess } = require('../utils/response');
 
 const getUsers = async (req, res, next) => {
   try {
-    const users = await adminService.getAllUsers();
+    const users = await adminService.getAllUsers(req.query.search);
     sendSuccess(res, 200, 'Users retrieved', { users });
   } catch (err) {
     next(err);
@@ -20,6 +20,21 @@ const adjustBalance = async (req, res, next) => {
   }
 };
 
+const giftGems = async (req, res, next) => {
+  try {
+    const { walletId, userId, amount, description } = req.body;
+    const result = await adminService.giftGems(req.user.id, {
+      walletId,
+      userId,
+      amount,
+      description,
+    });
+    sendSuccess(res, 200, `Gifted ${result.gifted} Gems to ${result.username}`, result);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const getStats = async (req, res, next) => {
   try {
     const stats = await adminService.getStatistics();
@@ -29,4 +44,4 @@ const getStats = async (req, res, next) => {
   }
 };
 
-module.exports = { getUsers, adjustBalance, getStats };
+module.exports = { getUsers, adjustBalance, giftGems, getStats };

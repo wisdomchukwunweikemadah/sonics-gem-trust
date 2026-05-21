@@ -12,24 +12,58 @@
 cd backend
 npm install
 cp .env.example .env
-# Edit DATABASE_URL and JWT_SECRET in .env
+```
+
+Edit `backend/.env`:
+
+- `DATABASE_URL` — your PostgreSQL connection
+- `JWT_SECRET` — long random string
+- `FRONTEND_URL` — `http://localhost:5500` (local) or `https://sonics-gem-trust.vercel.app` (production)
+- `PORT=5001`
+
+```bash
 npm run db:push
 npm run db:generate
 npm run dev
 ```
 
-API runs at `https://dole-embolism-trustless.ngrok-free.dev/api`
+Startup should show:
 
-## Frontend Setup
+```
+✅ PostgreSQL connected
+✅ Server running on port 5001
+✅ CORS enabled
+✅ Email service ready / fallback mode
+```
 
-Serve the `frontend` folder with any static server:
+Health check: http://localhost:5001/api/health
+
+## Frontend Setup (local)
 
 ```bash
-# VS Code Live Server extension, or:
 npx serve frontend -p 5500
 ```
 
-Open `http://127.0.0.1:5500` (landing page) or `http://127.0.0.1:5500/pages/login.html`
+Open http://localhost:5500 or http://localhost:5500/pages/login.html
+
+The frontend automatically uses `http://localhost:5001/api` on localhost.
+
+## Public API (ngrok + mobile)
+
+```bash
+ngrok http 5001
+```
+
+Set in `backend/.env`:
+
+```env
+API_PUBLIC_URL=https://YOUR-SUBDOMAIN.ngrok-free.dev
+FRONTEND_URL=https://sonics-gem-trust.vercel.app
+```
+
+Set in **Vercel** → `SGT_API_URL=https://YOUR-SUBDOMAIN.ngrok-free.dev/api` and redeploy.
+
+See [deployment.md](deployment.md) for full details.
 
 ## Create Admin
 
@@ -51,10 +85,8 @@ EMAIL_PASS=xxxx xxxx xxxx xxxx
 EMAIL_FROM="SGT Wallet <your.email@gmail.com>"
 ```
 
-- `EMAIL_USER` must be your **full Gmail address** (not a display name).
-- Spaces in the app password are stripped automatically.
-- On `npm run dev`, the server logs `[Mail] Gmail SMTP verified` or a clear error.
-- Registration still completes if email fails; verification tokens are logged in development.
+- Email failures **do not** block registration or server startup.
+- Verification tokens are logged in the console during development.
 
 ## Cloudinary (Optional)
 

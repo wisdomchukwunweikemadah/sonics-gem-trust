@@ -37,8 +37,15 @@ const verifyMailConnection = async () => {
     return false;
   }
 
+  const timeoutMs = Number(process.env.MAIL_VERIFY_TIMEOUT_MS) || 8000;
+
   try {
-    await transporter.verify();
+    await Promise.race([
+      transporter.verify(),
+      new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(`SMTP verify timed out after ${timeoutMs}ms`)), timeoutMs);
+      }),
+    ]);
     smtpVerified = true;
     console.log(`[Mail] Gmail SMTP verified for ${getEmailUser()}`);
     return true;

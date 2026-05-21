@@ -28,6 +28,14 @@ router.use(protect);
 
 router.get('/profile', userController.getProfile);
 router.put('/update', userController.updateProfile);
-router.post('/avatar', upload.single('avatar'), userController.uploadAvatar);
+router.post('/avatar', (req, res, next) => {
+  upload.single('avatar')(req, res, (err) => {
+    if (err) {
+      err.statusCode = 400;
+      return next(err);
+    }
+    next();
+  });
+}, userController.uploadAvatar);
 
 module.exports = router;

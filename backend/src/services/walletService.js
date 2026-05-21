@@ -1,5 +1,6 @@
 const { Prisma } = require('@prisma/client');
 const { prisma } = require('../config/db');
+const findUserWithWallet = require('../utils/findUserWallet');
 const emailNotify = require('./emailNotificationService');
 
 const GEMS_PER_USSD = 100;
@@ -52,16 +53,7 @@ const sendGems = async (senderId, { recipientWalletId, amount, reference }) => {
     include: { wallet: true },
   });
 
-  const recipient = await prisma.user.findUnique({
-    where: { walletId: recipientWalletId },
-    include: { wallet: true },
-  });
-
-  if (!recipient?.wallet) {
-    const err = new Error('Invalid recipient wallet ID');
-    err.statusCode = 404;
-    throw err;
-  }
+  const recipient = await findUserWithWallet(recipientWalletId);
 
   if (recipient.id === senderId) {
     const err = new Error('Cannot send gems to yourself');

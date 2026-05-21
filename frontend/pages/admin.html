@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="sgt-api-base" content="https://dole-embolism-trustless.ngrok-free.dev/api" />
+  <script src="../assets/js/head-api.js?v=5"></script>
+
   <title>Admin — SGT Wallet</title>
   <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <link rel="stylesheet" href="../assets/css/dashboard.css" />
   <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <link rel="stylesheet" href="../assets/css/enhancements.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
 </head>
 <body>
@@ -15,7 +19,7 @@
     <div id="sidebar-container"></div>
     <main class="main-content">
       <header class="topbar">
-        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">☰</button>
         <h2>Admin Dashboard</h2>
         <div class="topbar-actions">
           <button class="theme-toggle" id="theme-toggle">🌗</button>
@@ -29,16 +33,44 @@
           <div class="glass stat-card"><p class="label">Total Gems</p><p class="value" id="stat-gems">0</p></div>
           <div class="glass stat-card"><p class="label">Total USSD</p><p class="value" id="stat-ussd">0</p></div>
         </div>
-        <section class="glass" style="padding:1.5rem;margin-top:1.5rem">
-          <h3>Adjust Balance</h3>
-          <form id="balance-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1rem">
-            <input class="form-control" name="userId" placeholder="User UUID" required />
-            <input class="form-control" name="gemBalance" type="number" step="0.01" placeholder="New Gems" />
-            <input class="form-control" name="ussdBalance" type="number" step="0.01" placeholder="New USSD" />
-            <button type="submit" class="btn btn-primary">Update</button>
+
+        <section class="glass admin-section">
+          <h3>Gift Gems</h3>
+          <p class="text-muted section-desc">Send Gems to any user — balance updates instantly with transaction history.</p>
+          <form id="gift-form" class="admin-form-grid">
+            <select class="form-control" name="walletId" id="gift-wallet-select" required>
+              <option value="">Select recipient</option>
+            </select>
+            <input class="form-control" name="amount" type="number" min="0.01" step="0.01" placeholder="Gems to gift" required />
+            <input class="form-control" name="description" placeholder="Note (optional)" />
+            <button type="submit" class="btn btn-primary">Gift Gems</button>
           </form>
         </section>
-        <section class="glass" style="padding:1.5rem;margin-top:1.5rem;overflow-x:auto">
+
+        <section class="glass admin-section">
+          <h3>Set Absolute Balance</h3>
+          <p class="text-muted section-desc">Override a user's exact Gem or USSD balance.</p>
+          <form id="balance-form" class="admin-form-grid">
+            <select class="form-control" name="userId" id="balance-user-select" required>
+              <option value="">Select user</option>
+            </select>
+            <input class="form-control" name="gemBalance" type="number" step="0.01" min="0" placeholder="New Gems total" />
+            <input class="form-control" name="ussdBalance" type="number" step="0.01" min="0" placeholder="New USSD total" />
+            <button type="submit" class="btn btn-outline">Update Balance</button>
+          </form>
+        </section>
+
+        <section class="glass admin-section">
+          <h3>Search Users</h3>
+          <input class="form-control" id="user-search" placeholder="Search by name, email, or wallet ID" />
+        </section>
+
+        <section class="glass admin-section">
+          <h3>Recent Activity</h3>
+          <div id="admin-activity" class="activity-feed"></div>
+        </section>
+
+        <section class="glass admin-section table-section">
           <h3>All Users</h3>
           <table class="admin-table">
             <thead><tr><th>User</th><th>Email</th><th>Wallet</th><th>Gems</th><th>USSD</th><th>Role</th></tr></thead>
@@ -48,10 +80,14 @@
       </div>
     </main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <script src="../assets/js/notifications.js"></script>
-  <script src="../assets/js/theme.js"></script>
-  <script src="../assets/js/app.js"></script>
-  <script src="../assets/js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="../assets/js/runtime-config.js?v=5"></script>
+  <script src="../assets/js/env.generated.js?v=5"></script>
+  <script src="../assets/js/config.js?v=5"></script>
+  <script src="../assets/js/notifications.js?v=5"></script>
+  <script src="../assets/js/notifications.js?v=5"></script>
+  <script src="../assets/js/theme.js?v=5"></script>
+  <script src="../assets/js/sgt-wallet.js?v=5"></script>
+  <script src="../assets/js/admin.js?v=5"></script>
 </body>
 </html>

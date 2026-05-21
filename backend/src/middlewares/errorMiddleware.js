@@ -6,6 +6,10 @@ const notFound = (req, res, next) => {
 };
 
 const errorHandler = (err, req, res, next) => {
+  if (err.message === 'Not allowed by CORS') {
+    return sendError(res, 403, 'Origin not allowed by CORS policy');
+  }
+
   const statusCode = err.statusCode || (res.statusCode && res.statusCode !== 200 ? res.statusCode : 500);
 
   if (err.name === 'JsonWebTokenError') {

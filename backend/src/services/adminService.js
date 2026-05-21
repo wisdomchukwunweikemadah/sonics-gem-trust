@@ -1,8 +1,21 @@
 const { Prisma } = require('@prisma/client');
+const { v4: uuidv4 } = require('uuid');
 const { prisma } = require('../config/db');
+const findUserWithWallet = require('../utils/findUserWallet');
 
-const getAllUsers = async () => {
+const getAllUsers = async (search = '') => {
+  const where = search
+    ? {
+        OR: [
+          { username: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { walletId: { contains: search, mode: 'insensitive' } },
+        ],
+      }
+    : {};
+
   const users = await prisma.user.findMany({
+    where,
     select: {
       id: true,
       username: true,
@@ -11,9 +24,7 @@ const getAllUsers = async () => {
       role: true,
       isEmailVerified: true,
       createdAt: true,
-      wallet: {
-        select: { gemBalance: true, ussdBalance: true },
-      },
+      wallet: { select: { gemBalance: true, ussdBalance: true } },
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -21,21 +32,14 @@ const getAllUsers = async () => {
   return users.map((u) => ({
     ...u,
     wallet: u.wallet
-      ? {
-          gemBalance: Number(u.wallet.gemBalance),
-          ussdBalance: Number(u.wallet.ussdBalance),
-        }
+      ? { gemBalance: Number(u.wallet.gemBalance), ussdBalance: Number(u.wallet.ussdBalance) }
       : null,
   }));
 };
 
 const adjustBalance = async (userId, { gemBalance, ussdBalance }) => {
-  const wallet = await prisma.wallet.findUnique({ where: { userId } });
-  if (!wallet) {
-    const err = new Error('Wallet not found');
-    err.statusCode = 404;
-    throw err;
-  }
+  const user = await findUserWithWallet(userId);
+  const wallet = user.wallet;
 
   const data = {};
   if (gemBalance !== undefined) {
@@ -57,10 +61,13 @@ const adjustBalance = async (userId, { gemBalance, ussdBalance }) => {
     data.ussdBalance = ussd;
   }
 
-  const updated = await prisma.wallet.update({
-    where: { userId },
-    data,
-  });
+  if (!Object.keys(data).length) {
+    const err = new Error('Provide gemBalance and/or ussdBalance');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const updated = await prisma.wallet.update({ where: { id: wallet.id }, data });
 
   return {
     gemBalance: Number(updated.gemBalance),
@@ -68,23 +75,63 @@ const adjustBalance = async (userId, { gemBalance, ussdBalance }) => {
   };
 };
 
+const giftGems = async (adminId, { walletId, userId, amount, description }) => {
+  const giftAmount = new Prisma.Decimal(amount);
+  if (giftAmount.lte(0)) {
+    const err = new Error('Gift amount must be greater than zero');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const user = await findUserWithWallet(walletId || userId);
+  const reference = `GIFT-${uuidv4().slice(0, 8).toUpperCase()}`;
+
+  const result = await prisma.$transaction(async (tx) => {
+    const updatedWallet = await tx.wallet.update({
+      where: { id: user.wallet.id },
+      data: { gemBalance: { increment: giftAmount } },
+    });
+
+    await tx.transaction.create({
+      data: {
+        type: 'BONUS',
+        amount: giftAmount,
+        receiverId: user.id,
+        senderId: adminId,
+        walletId: user.wallet.id,
+        status: 'COMPLETED',
+        description: description || 'Admin gem gift',
+        reference,
+      },
+    });
+
+    return updatedWallet;
+  });
+
+  return {
+    walletId: user.walletId,
+    username: user.username,
+    gemBalance: Number(result.gemBalance),
+    ussdBalance: Number(result.ussdBalance),
+    gifted: Number(giftAmount),
+    reference,
+  };
+};
+
 const getStatistics = async () => {
-  const [userCount, txCount, wallets] = await Promise.all([
+  const [userCount, txCount, wallets, recentTx] = await Promise.all([
     prisma.user.count(),
     prisma.transaction.count(),
-    prisma.wallet.aggregate({
-      _sum: { gemBalance: true, ussdBalance: true },
+    prisma.wallet.aggregate({ _sum: { gemBalance: true, ussdBalance: true } }),
+    prisma.transaction.findMany({
+      take: 15,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        sender: { select: { username: true } },
+        receiver: { select: { username: true } },
+      },
     }),
   ]);
-
-  const recentTx = await prisma.transaction.findMany({
-    take: 10,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      sender: { select: { username: true } },
-      receiver: { select: { username: true } },
-    },
-  });
 
   return {
     userCount,
@@ -96,6 +143,7 @@ const getStatistics = async () => {
       type: t.type,
       amount: Number(t.amount),
       status: t.status,
+      description: t.description,
       createdAt: t.createdAt,
       sender: t.sender?.username,
       receiver: t.receiver?.username,
@@ -103,4 +151,4 @@ const getStatistics = async () => {
   };
 };
 
-module.exports = { getAllUsers, adjustBalance, getStatistics };
+module.exports = { getAllUsers, adjustBalance, giftGems, getStatistics };
