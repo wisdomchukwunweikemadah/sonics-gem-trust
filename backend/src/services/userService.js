@@ -4,6 +4,7 @@ const { prisma } = require('../config/db');
 const { cloudinary, isConfigured } = require('../config/cloudinary');
 const { resolvePublicUrl } = require('../utils/mediaUrl');
 const { computeBadges } = require('./featuresService');
+const { ensureWallet } = require('../utils/ensureWallet');
 const emailNotify = require('./emailNotificationService');
 
 const getProfile = async (userId) => {
@@ -34,6 +35,10 @@ const getProfile = async (userId) => {
     const err = new Error('User not found');
     err.statusCode = 404;
     throw err;
+  }
+
+  if (!user.wallet) {
+    user.wallet = await ensureWallet(userId);
   }
 
   const enriched = { ...user, wallet: user.wallet };
@@ -99,11 +104,17 @@ const uploadProfileImage = async (userId, filePath) => {
   if (!isConfigured) {
     profileImageUrl = `/uploads/${path.basename(filePath)}`;
   } else {
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder: 'sgt-wallet/profiles',
-      transformation: [{ width: 400, height: 400, crop: 'fill' }],
-    });
-    profileImageUrl = result.secure_url;
+    try {
+      const result = await cloudinary.uploader.upload(filePath, {
+        folder: 'sgt-wallet/profiles',
+        transformation: [{ width: 400, height: 400, crop: 'fill' }],
+      });
+      profileImageUrl = result.secure_url;
+    } catch (err) {
+      const uploadErr = new Error(`Image upload failed: ${err.message}`);
+      uploadErr.statusCode = 502;
+      throw uploadErr;
+    }
   }
 
   const user = await updateProfile(userId, { profileImage: profileImageUrl });

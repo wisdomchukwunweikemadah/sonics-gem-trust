@@ -1,12 +1,17 @@
+const PRODUCTION_API = 'https://dole-embolism-trustless.ngrok-free.dev/api';
+
 const getApiBase = () => {
-  if (typeof window.getApiBase === 'function' && window.SGT_CONFIG) {
-    return window.getApiBase();
-  }
-  if (window.SGT_API_URL) return String(window.SGT_API_URL).replace(/\/+$/, '');
   if (window.SGT_CONFIG?.apiBase) return window.SGT_CONFIG.apiBase;
+  if (window.getApiBase && window.SGT_CONFIG) return window.getApiBase();
+  if (window.SGT_API_URL && !/localhost|127\.0\.0\.1/i.test(window.SGT_API_URL)) {
+    return String(window.SGT_API_URL).replace(/\/+$/, '');
+  }
+  if (window.__SGT_API_BASE__ && !/localhost|127\.0\.0\.1/i.test(window.__SGT_API_BASE__)) {
+    return String(window.__SGT_API_BASE__).replace(/\/+$/, '');
+  }
   const h = window.location.hostname;
   if (h === 'localhost' || h === '127.0.0.1') return 'http://localhost:5001/api';
-  return 'https://dole-embolism-trustless.ngrok-free.dev/api';
+  return PRODUCTION_API;
 };
 
 const isProductionClient = () => {
@@ -20,6 +25,13 @@ const resolveMediaUrl = (url) => {
   if (/^https?:\/\//i.test(url)) return url;
   const base = getApiBase().replace(/\/api$/, '');
   return `${base}${url.startsWith('/') ? url : `/${url}`}`;
+};
+
+const getInitials = (name) => {
+  if (!name) return '?';
+  const parts = String(name).trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return String(name).slice(0, 2).toUpperCase();
 };
 
 const Storage = {
@@ -148,14 +160,41 @@ const loadComponent = async (selector, path) => {
   }
 };
 
-const setAvatarImage = (imgEl, profileImage, fallback = '../assets/images/logo.svg') => {
+const applyAvatarToElement = (imgEl, profileImage, displayName, fallback = '../assets/images/logo.svg') => {
   if (!imgEl) return;
   const resolved = resolveMediaUrl(profileImage);
-  imgEl.src = resolved || fallback;
-  imgEl.onerror = () => {
-    imgEl.onerror = null;
-    imgEl.src = fallback;
-  };
+  const parent = imgEl.parentElement;
+
+  if (resolved && !resolved.includes('avatar.png')) {
+    imgEl.src = resolved;
+    imgEl.style.display = '';
+    imgEl.onerror = () => {
+      imgEl.onerror = null;
+      imgEl.src = fallback;
+    };
+    parent?.querySelector('.avatar-initials')?.remove();
+    return;
+  }
+
+  imgEl.style.display = 'none';
+  let initialsEl = parent?.querySelector('.avatar-initials');
+  if (!initialsEl && parent) {
+    initialsEl = document.createElement('span');
+    initialsEl.className = 'avatar-initials';
+    parent.appendChild(initialsEl);
+  }
+  if (initialsEl) {
+    initialsEl.textContent = getInitials(displayName || Storage.getUser()?.username);
+    initialsEl.style.display = 'flex';
+  }
+};
+
+const setAvatarImage = (imgEl, profileImage, displayName) => {
+  applyAvatarToElement(
+    imgEl,
+    profileImage,
+    displayName || Storage.getUser()?.username
+  );
 };
 
 const animateCounter = (el, target, duration = 800) => {
@@ -171,3 +210,45 @@ const animateCounter = (el, target, duration = 800) => {
   };
   requestAnimationFrame(step);
 };
+
+/* Session expiry + online status */
+const parseJwtExpiry = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+};
+
+const checkSessionExpiry = () => {
+  const token = Storage.getToken();
+  if (!token) return;
+  const exp = parseJwtExpiry(token);
+  if (exp && Date.now() >= exp) {
+    Storage.clear();
+    notify?.warning?.('Session expired. Please sign in again.');
+    const path = window.location.pathname;
+    if (!path.includes('login') && !path.includes('register')) {
+      window.location.href = path.includes('/pages/') ? 'login.html' : 'pages/login.html';
+    }
+  }
+};
+
+const initConnectionStatus = () => {
+  const dot = document.getElementById('connection-status');
+  if (!dot) return;
+  const sync = () => {
+    dot.classList.toggle('offline', !navigator.onLine);
+    dot.title = navigator.onLine ? 'Online' : 'Offline';
+  };
+  window.addEventListener('online', sync);
+  window.addEventListener('offline', sync);
+  sync();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkSessionExpiry();
+  initConnectionStatus();
+  setInterval(checkSessionExpiry, 60000);
+});

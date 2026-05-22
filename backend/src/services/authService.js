@@ -4,7 +4,12 @@ const { prisma } = require('../config/db');
 const generateWalletId = require('../utils/generateWalletId');
 const { signToken } = require('../utils/jwt');
 const formatAuthUser = require('../utils/formatAuthUser');
+const { ensureWallet } = require('../utils/ensureWallet');
 const emailNotify = require('./emailNotificationService');
+
+const PRODUCTION_FRONTEND = 'https://sonics-gem-trust.vercel.app';
+const getFrontendUrl = () =>
+  (process.env.FRONTEND_URL || PRODUCTION_FRONTEND).replace(/\/$/, '');
 
 const SIGNUP_BONUS_GEMS = 1000;
 const SALT_ROUNDS = 12;
@@ -100,6 +105,10 @@ const loginUser = async ({ email, password }, loginMeta = {}) => {
     throw err;
   }
 
+  if (!user.wallet) {
+    user.wallet = await ensureWallet(user.id);
+  }
+
   const token = signToken({ id: user.id, role: user.role });
 
   emailNotify.sendLoginAlertEmail(user, loginMeta).catch((e) =>
@@ -182,10 +191,44 @@ const resetPassword = async ({ token, password }) => {
   return { message: 'Password updated successfully' };
 };
 
+const resendVerification = async (email) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return { message: 'If the email exists, a verification link was sent' };
+  }
+  if (user.isEmailVerified) {
+    return { message: 'Email is already verified' };
+  }
+
+  await prisma.verificationToken.deleteMany({ where: { userId: user.id } });
+  const verifyToken = uuidv4();
+  await prisma.verificationToken.create({
+    data: {
+      userId: user.id,
+      token: verifyToken,
+      expiresAt: new Date(Date.now() + TOKEN_HOURS * 60 * 60 * 1000),
+    },
+  });
+
+  const mailResult = await emailNotify.sendVerificationEmail(user, verifyToken);
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[Auth] Dev verification token for ${email}: ${verifyToken}`);
+  }
+
+  return {
+    message: 'If the email exists, a verification link was sent',
+    emailSent: mailResult.sent,
+    token: process.env.NODE_ENV === 'development' ? verifyToken : undefined,
+  };
+};
+
 module.exports = {
   registerUser,
   loginUser,
   verifyEmail,
   requestPasswordReset,
   resetPassword,
+  resendVerification,
+  getFrontendUrl,
 };

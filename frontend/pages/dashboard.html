@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="sgt-api-base" content="https://dole-embolism-trustless.ngrok-free.dev/api" />
-  <script src="../assets/js/head-api.js?v=5"></script>
+  <script src="../assets/js/head-api.js?v=6"></script>
 
   <title>Dashboard — SGT Wallet</title>
   <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml" />
@@ -26,6 +26,7 @@
           <p class="text-muted" style="font-size:0.85rem" id="user-email">—</p>
         </div>
         <div class="topbar-actions">
+          <span id="connection-status" title="Online"></span>
           <button class="theme-toggle" id="theme-toggle" title="Theme">🌗</button>
           <img id="user-avatar" src="../assets/images/logo.svg" alt="Avatar" style="width:36px;height:36px;border-radius:50%;" />
           <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
@@ -36,7 +37,8 @@
         <div class="dashboard-grid">
           <section class="glass wallet-hero float-card">
             <p class="text-muted">Welcome back, <strong id="user-name">User</strong></p>
-            <p>Wallet ID <span class="wallet-id" id="wallet-id-display" title="Click to copy">—</span></p>
+            <p>Wallet ID <span class="wallet-id" id="wallet-id-display" title="Click to copy">—</span>
+              <button type="button" class="btn-copy-mini" id="copy-wallet-btn" title="Copy wallet ID">⧉ Copy</button></p>
             <div class="balance-row">
               <div class="balance-item">
                 <p class="text-muted">Gems</p>
@@ -159,14 +161,13 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <script src="../assets/js/runtime-config.js?v=5"></script>
-  <script src="../assets/js/env.generated.js?v=5"></script>
-  <script src="../assets/js/config.js?v=5"></script>
-  <script src="../assets/js/notifications.js?v=5"></script>
-  <script src="../assets/js/notifications.js?v=5"></script>
-  <script src="../assets/js/theme.js?v=5"></script>
-  <script src="../assets/js/sgt-wallet.js?v=5"></script>
-  <script src="../assets/js/wallet.js?v=5"></script>
-  <script src="../assets/js/dashboard.js?v=5"></script>
+
+  <script src="../assets/js/config.js?v=6"></script>
+  <script src="../assets/js/notifications.js?v=6"></script>
+  
+  <script src="../assets/js/theme.js?v=6"></script>
+  <script src="../assets/js/sgt-wallet.js?v=6"></script>
+  <script src="../assets/js/wallet.js?v=6"></script>
+  <script src="../assets/js/dashboard.js?v=6"></script>
 </body>
 </html>

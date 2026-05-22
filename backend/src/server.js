@@ -53,6 +53,14 @@ const startEmailVerification = () => {
 const startServer = async () => {
   await connectDB();
 
+  try {
+    const { backfillMissingWallets } = require('./utils/ensureWallet');
+    const count = await backfillMissingWallets();
+    if (count > 0) console.log(`[DB] Backfilled ${count} missing wallet(s)`);
+  } catch (err) {
+    console.warn('[DB] Wallet backfill skipped:', err.message);
+  }
+
   const emailReady = await startEmailVerification();
 
   const server = http.createServer(app);

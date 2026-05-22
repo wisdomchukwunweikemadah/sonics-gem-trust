@@ -171,10 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.getElementById('wallet-id-display')?.addEventListener('click', () => {
-    const id = document.getElementById('wallet-id-display')?.textContent;
-    if (id) copyToClipboard(id);
-  });
+  const copyWallet = () => {
+    const id = document.getElementById('wallet-id-display')?.textContent?.trim();
+    if (id && id !== '—') copyToClipboard(id);
+  };
+  document.getElementById('wallet-id-display')?.addEventListener('click', copyWallet);
+  document.getElementById('copy-wallet-btn')?.addEventListener('click', copyWallet);
 
   document.getElementById('daily-reward-btn')?.addEventListener('click', async () => {
     const btn = document.getElementById('daily-reward-btn');
@@ -199,4 +201,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   refreshDashboard();
+  setInterval(refreshDashboard, 30000);
 });

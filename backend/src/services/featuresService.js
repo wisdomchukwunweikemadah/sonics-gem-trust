@@ -1,5 +1,6 @@
 const { Prisma } = require('@prisma/client');
 const { prisma } = require('../config/db');
+const { ensureWallet } = require('../utils/ensureWallet');
 
 const DAILY_REWARDS = [50, 75, 100, 125, 150, 200, 300];
 
@@ -83,9 +84,7 @@ const claimDailyReward = async (userId) => {
   });
 
   if (!user?.wallet) {
-    const err = new Error('Wallet not found');
-    err.statusCode = 404;
-    throw err;
+    user.wallet = await ensureWallet(userId);
   }
 
   const now = new Date();

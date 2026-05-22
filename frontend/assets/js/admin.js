@@ -29,9 +29,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const form = e.target;
     const submitBtn = form.querySelector('[type="submit"]');
     const amount = parseFloat(form.amount.value);
-    const walletId = form.walletId?.value || document.getElementById('gift-wallet-select')?.value;
+    const select = document.getElementById('gift-wallet-select');
+    const walletId = (form.walletId?.value || select?.value || '').trim();
+    const userId = select?.selectedOptions?.[0]?.dataset?.userId;
 
-    if (!walletId) {
+    if (!walletId && !userId) {
       notify.error('Select a recipient');
       return;
     }
@@ -44,7 +46,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const res = await api('/admin/gift-gems', {
         method: 'POST',
-        body: { walletId, amount, description: form.description?.value?.trim() || undefined },
+        body: {
+          walletId: walletId || undefined,
+          userId: userId || undefined,
+          amount,
+          description: form.description?.value?.trim() || undefined,
+        },
       });
       notify.success(res.message || 'Gems gifted successfully');
       form.reset();
@@ -92,7 +99,7 @@ function populateUserSelects(users) {
   const giftOptions = users
     .map(
       (u) =>
-        `<option value="${u.walletId}">${u.username} (${u.walletId}) — ${formatNumber(u.wallet?.gemBalance)} G</option>`
+        `<option value="${u.walletId}" data-user-id="${u.id}">${u.username} (${u.walletId}) — ${formatNumber(u.wallet?.gemBalance ?? 0)} G</option>`
     )
     .join('');
   if (giftSelect) giftSelect.innerHTML = `<option value="">Select recipient</option>${giftOptions}`;
@@ -143,11 +150,15 @@ async function loadAdminData(search = '') {
       (u) => `<tr>
       <td>${u.username}</td>
       <td>${u.email}</td>
-      <td><code class="wallet-id">${u.walletId}</code></td>
-      <td>${formatNumber(u.wallet?.gemBalance)}</td>
-      <td>${formatNumber(u.wallet?.ussdBalance)}</td>
+      <td><code class="wallet-id">${u.walletId}</code> <button type="button" class="btn-copy-mini" data-copy="${u.walletId}" title="Copy">⧉</button></td>
+      <td>${formatNumber(u.wallet?.gemBalance ?? 0)}</td>
+      <td>${formatNumber(u.wallet?.ussdBalance ?? 0)}</td>
       <td><span class="badge badge-primary">${u.role}</span></td>
     </tr>`
     )
     .join('');
+
+  document.querySelectorAll('.btn-copy-mini').forEach((btn) => {
+    btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy));
+  });
 }

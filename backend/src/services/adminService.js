@@ -83,7 +83,15 @@ const giftGems = async (adminId, { walletId, userId, amount, description }) => {
     throw err;
   }
 
-  const user = await findUserWithWallet(walletId || userId);
+  const recipientRef = (walletId || userId || '').trim();
+  const user = await findUserWithWallet(recipientRef);
+
+  if (!user.wallet?.id) {
+    const err = new Error('Could not resolve recipient wallet');
+    err.statusCode = 500;
+    throw err;
+  }
+
   const reference = `GIFT-${uuidv4().slice(0, 8).toUpperCase()}`;
 
   const result = await prisma.$transaction(async (tx) => {

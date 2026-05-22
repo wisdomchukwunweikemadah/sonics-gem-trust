@@ -21,6 +21,7 @@
       global.location.protocol === 'https:' ||
       host.endsWith('.vercel.app') ||
       host.includes('ngrok-free.app') ||
+      host.includes('ngrok-free.dev') ||
       host.includes('ngrok.io')
     );
   };
@@ -33,34 +34,25 @@
   };
 
   const resolveApiBase = () => {
-    if (global.SGT_API_URL && !isLocalApiUrl(global.SGT_API_URL)) {
-      return normalizeBase(global.SGT_API_URL);
-    }
-    if (global.SGT_API_URL && isLocalDev()) {
-      return normalizeBase(global.SGT_API_URL);
-    }
-
-    if (isLocalDev()) {
-      const override = normalizeBase(global.localStorage?.getItem('sgt_api_base'));
-      return override || LOCAL_API;
+    if (isProductionDeployment()) {
+      const preset = normalizeBase(global.SGT_API_URL);
+      const meta = normalizeBase(readMetaApiBase());
+      const injected = normalizeBase(global.__SGT_API_BASE__);
+      if (preset && !isLocalApiUrl(preset)) return preset;
+      if (meta && !isLocalApiUrl(meta)) return meta;
+      if (injected && !isLocalApiUrl(injected)) return injected;
+      return PRODUCTION_API;
     }
 
-    let override = normalizeBase(global.localStorage?.getItem('sgt_api_base'));
-    if (override && isLocalApiUrl(override)) {
-      try {
-        global.localStorage.removeItem('sgt_api_base');
-      } catch (e) {}
-      override = '';
-    }
+    const override = normalizeBase(global.localStorage?.getItem('sgt_api_base'));
+    if (override) return override;
 
     const meta = normalizeBase(readMetaApiBase());
     const injected = normalizeBase(global.__SGT_API_BASE__);
-
-    if (override && !isLocalApiUrl(override)) return override;
     if (meta && !isLocalApiUrl(meta)) return meta;
     if (injected && !isLocalApiUrl(injected)) return injected;
 
-    return PRODUCTION_API;
+    return LOCAL_API;
   };
 
   let apiBase = resolveApiBase();
@@ -79,12 +71,13 @@
       const normalized = normalizeBase(url);
       if (!normalized) {
         global.localStorage?.removeItem('sgt_api_base');
-      } else if (isProductionDeployment() && isLocalApiUrl(normalized)) {
+        return;
+      }
+      if (isProductionDeployment() && isLocalApiUrl(normalized)) {
         console.warn('[SGT] Cannot use localhost API on production.');
         return;
-      } else {
-        global.localStorage?.setItem('sgt_api_base', normalized);
       }
+      global.localStorage?.setItem('sgt_api_base', normalized);
     },
     clearApiOverride() {
       global.localStorage?.removeItem('sgt_api_base');

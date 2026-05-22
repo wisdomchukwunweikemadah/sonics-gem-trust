@@ -1,6 +1,7 @@
 const { Prisma } = require('@prisma/client');
 const { prisma } = require('../config/db');
 const findUserWithWallet = require('../utils/findUserWallet');
+const { ensureWallet } = require('../utils/ensureWallet');
 const emailNotify = require('./emailNotificationService');
 
 const GEMS_PER_USSD = 100;
@@ -8,7 +9,7 @@ const GEMS_PER_USSD = 100;
 const toNumber = (val) => Number(val);
 
 const getBalance = async (userId) => {
-  const wallet = await prisma.wallet.findUnique({
+  let wallet = await prisma.wallet.findUnique({
     where: { userId },
     include: {
       user: {
@@ -18,9 +19,11 @@ const getBalance = async (userId) => {
   });
 
   if (!wallet) {
-    const err = new Error('Wallet not found');
-    err.statusCode = 404;
-    throw err;
+    wallet = await ensureWallet(userId);
+    wallet.user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { walletId: true, username: true },
+    });
   }
 
   return {
@@ -148,9 +151,7 @@ const convertGemsToUssd = async (userId, { gemsAmount, reference }) => {
   });
 
   if (!user?.wallet) {
-    const err = new Error('Wallet not found');
-    err.statusCode = 404;
-    throw err;
+    user.wallet = await ensureWallet(userId);
   }
 
   if (new Prisma.Decimal(user.wallet.gemBalance).lt(gems)) {
@@ -232,9 +233,7 @@ const convertUssdToGems = async (userId, { ussdAmount, reference }) => {
   });
 
   if (!user?.wallet) {
-    const err = new Error('Wallet not found');
-    err.statusCode = 404;
-    throw err;
+    user.wallet = await ensureWallet(userId);
   }
 
   if (new Prisma.Decimal(user.wallet.ussdBalance).lt(ussd)) {

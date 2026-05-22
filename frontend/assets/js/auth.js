@@ -14,14 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
   const verifyForm = document.getElementById('verify-form');
+  const resendForm = document.getElementById('resend-verify-form');
   const resetForm = document.getElementById('reset-form');
   const requestResetForm = document.getElementById('request-reset-form');
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('verify')) {
-    const verifyInput = document.getElementById('verify-token');
-    if (verifyInput) verifyInput.value = params.get('verify');
-    switchTab('verify');
+    window.location.replace(`verify-email.html?token=${encodeURIComponent(params.get('verify'))}`);
+    return;
   }
   if (params.get('reset')) {
     const resetInput = document.getElementById('reset-token');
@@ -77,8 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       saveAuthSession(res.data.token, res.data.user);
-      notify.success('Account created! 1,000 Gems added. Welcome aboard!');
-      goToDashboard();
+      notify.success('Account created! 1,000 Gems added. Redirecting…');
+      setTimeout(goToDashboard, 400);
     } catch (err) {
       notify.error(err.message);
       submitBtn.disabled = false;
@@ -87,13 +87,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   verifyForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const token = verifyForm.token.value.trim();
+    window.location.href = `verify-email.html?token=${encodeURIComponent(token)}`;
+  });
+
+  resendForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
     try {
-      await api('/auth/verify-email', {
+      const res = await api('/auth/resend-verification', {
         method: 'POST',
-        body: { token: verifyForm.token.value.trim() },
+        body: { email: resendForm.email.value.trim() },
       });
-      notify.success('Email verified!');
-      switchTab('login');
+      notify.success(res.message);
+      if (res.data?.token) notify.info(`Dev token: ${res.data.token}`);
     } catch (err) {
       notify.error(err.message);
     }
@@ -107,9 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: { email: requestResetForm.email.value.trim() },
       });
       notify.success(res.message);
-      if (res.data?.token) {
-        notify.info(`Dev reset token: ${res.data.token}`);
-      }
+      if (res.data?.token) notify.info(`Dev reset token: ${res.data.token}`);
     } catch (err) {
       notify.error(err.message);
     }

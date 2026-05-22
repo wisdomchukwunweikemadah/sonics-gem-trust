@@ -1,10 +1,10 @@
 /**
- * MUST load first in <head> — sets production API before any cached bundle.
+ * Must load first in <head> — pins API base before any cached bundle runs.
  */
 (function (w) {
   var PROD = 'https://dole-embolism-trustless.ngrok-free.dev/api';
   var LOCAL = 'http://localhost:5001/api';
-  var host = w.location.hostname;
+  var host = (w.location && w.location.hostname) || '';
   var isLocal = host === 'localhost' || host === '127.0.0.1';
 
   if (!isLocal) {
@@ -12,9 +12,10 @@
     w.__SGT_API_BASE__ = PROD;
     w.__SGT_FORCE_PRODUCTION__ = true;
     try {
-      w.localStorage.removeItem('sgt_api_base');
+      if (w.localStorage) w.localStorage.removeItem('sgt_api_base');
     } catch (e) {}
   } else {
     w.SGT_API_URL = w.SGT_API_URL || LOCAL;
+    w.__SGT_API_BASE__ = w.__SGT_API_BASE__ || LOCAL;
   }
-})(window);
+})(typeof window !== 'undefined' ? window : globalThis);

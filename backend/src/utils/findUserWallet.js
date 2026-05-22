@@ -1,7 +1,8 @@
 const { prisma } = require('../config/db');
+const { ensureWallet } = require('./ensureWallet');
 
 /**
- * Resolve a user + wallet from walletId, user UUID, or email (case-insensitive walletId).
+ * Resolve a user + wallet from public walletId, user UUID, username, or email.
  */
 const findUserWithWallet = async (ref) => {
   const raw = (ref || '').trim();
@@ -12,36 +13,29 @@ const findUserWithWallet = async (ref) => {
   }
 
   const walletIdUpper = raw.toUpperCase();
+  const emailLower = raw.includes('@') ? raw.toLowerCase() : null;
 
-  let user = await prisma.user.findUnique({
-    where: { walletId: raw },
+  let user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { walletId: { equals: raw, mode: 'insensitive' } },
+        { walletId: walletIdUpper },
+        { id: raw },
+        ...(emailLower ? [{ email: { equals: emailLower, mode: 'insensitive' } }] : []),
+        { username: { equals: raw, mode: 'insensitive' } },
+      ],
+    },
     include: { wallet: true },
   });
 
   if (!user) {
-    user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { walletId: { equals: raw, mode: 'insensitive' } },
-          { walletId: walletIdUpper },
-          { id: raw },
-          { email: raw.toLowerCase() },
-        ],
-      },
-      include: { wallet: true },
-    });
-  }
-
-  if (!user) {
-    const err = new Error(`No user found for wallet or ID: ${raw}`);
+    const err = new Error(`No user found for: ${raw}`);
     err.statusCode = 404;
     throw err;
   }
 
   if (!user.wallet) {
-    user.wallet = await prisma.wallet.create({
-      data: { userId: user.id, gemBalance: 0, ussdBalance: 0 },
-    });
+    user.wallet = await ensureWallet(user.id);
   }
 
   return user;

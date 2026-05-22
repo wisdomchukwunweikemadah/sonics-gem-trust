@@ -1,6 +1,8 @@
 /**
- * Writes frontend/assets/js/env.generated.js for Vercel (or manual) deploys.
- * Set SGT_API_URL in Vercel project settings when ngrok URL changes.
+ * Optional local helper — writes env.generated.js when ngrok URL changes.
+ * Production deploys do NOT need this; head-api.js + config.js pin the API URL.
+ *
+ * Usage: SGT_API_URL=https://your.ngrok-free.dev/api node scripts/generate-frontend-env.js
  */
 const fs = require('fs');
 const path = require('path');

@@ -21,22 +21,34 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('settings-bio').value = u.bio || '';
       document.getElementById('settings-wallet').textContent = u.walletId;
       if (u.role === 'ADMIN') document.getElementById('admin-nav')?.classList.remove('hidden');
-      setAvatarImage(avatarPreview, u.profileImage);
+      setAvatarImage(avatarPreview, u.profileImage, u.username);
     })
     .catch((err) => notify.error(err.message));
 
-  avatarInput?.addEventListener('change', async (e) => {
+  avatarInput?.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
       notify.error('Image must be under 5MB');
+      avatarInput.value = '';
       return;
     }
 
+    const reader = new FileReader();
+    reader.onload = () => {
+      avatarPreview.src = reader.result;
+      avatarPreview.style.display = 'block';
+      avatarPreview.parentElement?.querySelector('.avatar-initials')?.remove();
+    };
+    reader.readAsDataURL(file);
+
+    uploadAvatar(file);
+  });
+
+  async function uploadAvatar(file) {
     const formData = new FormData();
     formData.append('avatar', file);
-
     const btn = document.getElementById('avatar-upload-btn');
     if (btn) btn.disabled = true;
 
@@ -44,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await api('/user/avatar', { method: 'POST', body: formData });
       const user = res.data;
       Storage.setUser({ ...Storage.getUser(), ...user });
-      setAvatarImage(avatarPreview, user.profileImage);
+      setAvatarImage(avatarPreview, user.profileImage, user.username);
       notify.success('Profile photo updated');
     } catch (err) {
       notify.error(err.message);
@@ -52,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btn) btn.disabled = false;
       avatarInput.value = '';
     }
-  });
+  }
 
   document.getElementById('profile-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();

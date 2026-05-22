@@ -24,10 +24,15 @@ const requestResetSchema = Joi.object({
   email: Joi.string().email().required(),
 });
 
+const resendVerificationSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   verifyEmailSchema,
   resetPasswordSchema,
   requestResetSchema,
+  resendVerificationSchema,
 };

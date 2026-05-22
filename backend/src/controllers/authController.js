@@ -54,8 +54,25 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+const resendVerification = async (req, res, next) => {
+  try {
+    const result = await authService.resendVerification(req.body.email);
+    sendSuccess(res, 200, result.message, process.env.NODE_ENV === 'development' ? { token: result.token } : null);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const logout = (req, res) => {
   sendSuccess(res, 200, 'Logged out successfully');
 };
 
-module.exports = { register, login, verifyEmail, requestReset, resetPassword, logout };
+module.exports = {
+  register,
+  login,
+  verifyEmail,
+  requestReset,
+  resetPassword,
+  resendVerification,
+  logout,
+};

@@ -232,6 +232,62 @@ body {
   50% { transform: translateY(-4px); }
 }
 
+.btn-copy-mini {
+  border: none;
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--primary);
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  vertical-align: middle;
+  margin-left: 0.25rem;
+}
+
+.btn-copy-mini:hover {
+  background: rgba(0, 212, 255, 0.22);
+}
+
+#connection-status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+  flex-shrink: 0;
+}
+
+#connection-status.offline {
+  background: var(--danger);
+  box-shadow: 0 0 8px var(--danger);
+}
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 60%, rgba(0, 212, 255, 0.06));
+  pointer-events: none;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-card) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+  min-height: 1rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 @media (max-width: 768px) {
   .toastify {
     max-width: min(320px, calc(100vw - 1.5rem)) !important;

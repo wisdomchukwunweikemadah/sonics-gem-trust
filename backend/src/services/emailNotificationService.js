@@ -1,13 +1,18 @@
 const sendEmail = require('../utils/sendEmail');
 const templates = require('../emails');
 
+const PRODUCTION_FRONTEND = 'https://sonics-gem-trust.vercel.app';
+
+const getFrontendUrl = () =>
+  (process.env.FRONTEND_URL || PRODUCTION_FRONTEND).replace(/\/$/, '');
+
 const dispatch = async (templateFn, to, payload) => {
   const { subject, html, text } = templateFn(payload);
   return sendEmail({ to, subject, html, text });
 };
 
 const sendVerificationEmail = (user, verifyToken) => {
-  const verifyUrl = `${process.env.FRONTEND_URL || 'http://127.0.0.1:5500'}/pages/login.html?verify=${verifyToken}`;
+  const verifyUrl = `${getFrontendUrl()}/pages/verify-email.html?token=${verifyToken}`;
   return dispatch(templates.verificationEmail, user.email, {
     username: user.username,
     verifyUrl,
@@ -16,7 +21,7 @@ const sendVerificationEmail = (user, verifyToken) => {
 };
 
 const sendPasswordResetEmail = (user, token) => {
-  const resetUrl = `${process.env.FRONTEND_URL || 'http://127.0.0.1:5500'}/pages/login.html?reset=${token}`;
+  const resetUrl = `${getFrontendUrl()}/pages/login.html?reset=${token}`;
   return dispatch(templates.passwordResetEmail, user.email, {
     username: user.username,
     resetUrl,
@@ -66,4 +71,5 @@ module.exports = {
   sendConvertToGemsEmail,
   sendConvertToUssdEmail,
   sendAboutEmail,
+  getFrontendUrl,
 };

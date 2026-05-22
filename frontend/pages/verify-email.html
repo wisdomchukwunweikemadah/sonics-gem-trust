@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="sgt-api-base" content="https://dole-embolism-trustless.ngrok-free.dev/api" />
+  <script src="../assets/js/head-api.js?v=6"></script>
+  <title>Verify Email — SGT Wallet</title>
+  <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/auth.css" />
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="glass auth-card verify-card">
+      <div class="auth-logo">
+        <img src="../assets/images/logo.svg" alt="SGT" />
+        <h1>Email Verification</h1>
+      </div>
+
+      <div id="verify-loading" class="verify-state">
+        <div class="spinner-inline"></div>
+        <p>Verifying your email…</p>
+      </div>
+
+      <div id="verify-success" class="verify-state hidden">
+        <div class="verify-icon success">✓</div>
+        <h2>Email verified!</h2>
+        <p class="subtitle">Your account is ready. Sign in to access your dashboard.</p>
+        <a href="login.html" class="btn btn-primary glow-btn" style="width:100%;margin-top:1rem">Go to Sign In</a>
+        <a href="dashboard.html" class="btn btn-outline" style="width:100%;margin-top:0.5rem">Open Dashboard</a>
+      </div>
+
+      <div id="verify-error" class="verify-state hidden">
+        <div class="verify-icon error">!</div>
+        <h2>Verification failed</h2>
+        <p id="verify-error-msg" class="subtitle">This link may be expired or invalid.</p>
+        <form id="resend-inline-form" style="margin-top:1.25rem">
+          <div class="form-group">
+            <label>Resend verification email</label>
+            <input class="form-control" name="email" type="email" required placeholder="you@email.com" />
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Resend Email</button>
+        </form>
+        <a href="login.html" style="display:block;text-align:center;margin-top:1rem">← Back to login</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="../assets/js/config.js?v=6"></script>
+  <script src="../assets/js/notifications.js?v=6"></script>
+  <script src="../assets/js/sgt-wallet.js?v=6"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = new URLSearchParams(window.location.search).get('token');
+      const loading = document.getElementById('verify-loading');
+      const success = document.getElementById('verify-success');
+      const error = document.getElementById('verify-error');
+      const errorMsg = document.getElementById('verify-error-msg');
+
+      const show = (state) => {
+        loading.classList.toggle('hidden', state !== 'loading');
+        success.classList.toggle('hidden', state !== 'success');
+        error.classList.toggle('hidden', state !== 'error');
+      };
+
+      if (!token) {
+        show('error');
+        errorMsg.textContent = 'No verification token provided.';
+        return;
+      }
+
+      try {
+        await api('/auth/verify-email', { method: 'POST', body: { token } });
+        show('success');
+        notify.success('Email verified successfully!');
+      } catch (err) {
+        show('error');
+        errorMsg.textContent = err.message || 'Verification failed.';
+      }
+
+      document.getElementById('resend-inline-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = e.target.email.value.trim();
+        try {
+          const res = await api('/auth/resend-verification', { method: 'POST', body: { email } });
+          notify.success(res.message);
+        } catch (err) {
+          notify.error(err.message);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

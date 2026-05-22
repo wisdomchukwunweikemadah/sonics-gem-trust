@@ -1,68 +1,123 @@
-# SGT Wallet — Deployment & Operations
+# SGT Wallet — Production Deployment
 
 ## URLs
 
 | Service | URL |
 |---------|-----|
-| Frontend | https://sonics-gem-trust.vercel.app |
+| Frontend (Vercel) | https://sonics-gem-trust.vercel.app |
 | API (ngrok) | https://dole-embolism-trustless.ngrok-free.dev/api |
 
-## Environment variables
+When your ngrok URL changes, update:
 
-### Backend (`backend/.env`)
+1. `frontend/assets/js/head-api.js` — `PROD` constant
+2. `frontend/assets/js/config.js` — `PRODUCTION_API` constant
+3. `<meta name="sgt-api-base" content="...">` in HTML pages (optional; head-api overrides on production)
+4. `backend/.env` — `API_PUBLIC_URL` (no `/api` suffix)
 
-```env
-PORT=5001
-NODE_ENV=production
-DATABASE_URL=postgresql://...
-JWT_SECRET=long_random_secret_32plus
-FRONTEND_URL=https://sonics-gem-trust.vercel.app
-API_PUBLIC_URL=https://YOUR-SUBDOMAIN.ngrok-free.dev
-```
+---
 
-**Important:** `PORT` must be numeric only (`5001`), never a URL.
+## Frontend (Vercel)
 
-### Vercel
+The frontend is **static** — no build step required.
 
-```env
-SGT_API_URL=https://YOUR-SUBDOMAIN.ngrok-free.dev/api
-```
+### Option A — Repository root
 
-## Run locally
+1. Connect the repo to Vercel.
+2. **Root Directory:** leave empty (project root).
+3. **Framework Preset:** Other
+4. **Build Command:** leave empty
+5. **Output Directory:** `frontend`
+6. Deploy.
+
+Uses root `vercel.json` (no `generate-frontend-env.js`).
+
+### Option B — Frontend folder as root
+
+1. Set **Root Directory** to `frontend`.
+2. **Build Command:** leave empty
+3. **Output Directory:** `.` (default)
+
+Uses `frontend/vercel.json`.
+
+### Cache busting
+
+Script tags use `?v=6`. Bump the version after API URL changes to force mobile browsers to reload JS.
+
+---
+
+## Backend (local + ngrok)
 
 ```bash
-cd backend && npm install && npm run dev
-npx serve frontend -p 5500
+cd backend
+cp .env.example .env
+# Edit DATABASE_URL, JWT_SECRET, FRONTEND_URL, API_PUBLIC_URL, email, Cloudinary
+npm install
+npm run db:push
+npm run dev
 ```
 
-## ngrok
+Expose port 5001:
 
 ```bash
 ngrok http 5001
 ```
 
-Update `SGT_API_URL` (Vercel), `API_PUBLIC_URL` (backend `.env`), redeploy frontend.
+Set in `backend/.env`:
 
-## API config (frontend)
+```env
+NODE_ENV=production
+FRONTEND_URL=https://sonics-gem-trust.vercel.app
+API_PUBLIC_URL=https://YOUR-SUBDOMAIN.ngrok-free.dev
+```
 
-Load order on every page:
+Restart the backend after changing `.env`.
 
-1. `head-api.js` — forces production API on Vercel
-2. `config.js` — centralized `SGT_CONFIG`
-3. `sgt-wallet.js` — all `api()` calls
+---
 
-## Redeploy Vercel
+## Required environment variables
 
-1. Push to GitHub
-2. Set `SGT_API_URL`
-3. Redeploy (clear cache)
-4. On mobile: clear site data or use private tab
+| Variable | Example |
+|----------|---------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | 32+ character secret |
+| `FRONTEND_URL` | `https://sonics-gem-trust.vercel.app` |
+| `API_PUBLIC_URL` | `https://YOUR-SUBDOMAIN.ngrok-free.dev` |
+| `EMAIL_USER` | Gmail address |
+| `EMAIL_PASS` | Google App Password |
+| `CLOUDINARY_*` | Optional; local `/uploads` used if unset |
 
-## Update ngrok later
+---
 
-- Vercel env `SGT_API_URL` + redeploy, or
-- Browser: `SGT_CONFIG.setApiOverride('https://NEW.ngrok-free.dev/api'); location.reload();`
+## Verification checklist
 
-## Health check
+- [ ] https://sonics-gem-trust.vercel.app loads
+- [ ] Register → auto-redirect to dashboard with JWT
+- [ ] Admin gift gems works (no “Wallet not found”)
+- [ ] Profile photo upload works
+- [ ] Mobile browser Network tab shows ngrok API (not localhost)
+- [ ] `GET https://YOUR-NGROK/api/health` returns success
 
-`GET /api/health` → `{ "success": true, "status": "SGT Wallet API Running" }`
+---
+
+## Troubleshooting
+
+**Mobile still calls localhost**
+
+- Clear site data / hard refresh on the phone.
+- Confirm `head-api.js` and `config.js` are loaded (not cached `app.js`).
+- Remove any `sgt_api_base` from localStorage (production clears this automatically).
+
+**Vercel build fails on generate-frontend-env.js**
+
+- Remove the build command in Vercel project settings.
+- Use the static `vercel.json` in this repo (no build step).
+
+**Profile images broken**
+
+- Set `API_PUBLIC_URL` to your ngrok root URL.
+- Or configure Cloudinary credentials in `backend/.env`.
+
+**CORS errors**
+
+- Set `FRONTEND_URL=https://sonics-gem-trust.vercel.app` in backend `.env`.
+- Restart the API after changes.

@@ -11,7 +11,7 @@ const BRAND = {
   warning: '#ffb020',
 };
 
-const FRONTEND = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
+const FRONTEND = (process.env.FRONTEND_URL || 'https://sonics-gem-trust.vercel.app').replace(/\/$/, '');
 
 const escapeHtml = (value = '') =>
   String(value)

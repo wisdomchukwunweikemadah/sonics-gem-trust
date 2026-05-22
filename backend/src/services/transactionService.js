@@ -1,12 +1,8 @@
 const { prisma } = require('../config/db');
+const { ensureWallet } = require('../utils/ensureWallet');
 
 const getUserTransactions = async (userId, { type, limit = 20, page = 1 }) => {
-  const wallet = await prisma.wallet.findUnique({ where: { userId } });
-  if (!wallet) {
-    const err = new Error('Wallet not found');
-    err.statusCode = 404;
-    throw err;
-  }
+  const wallet = (await prisma.wallet.findUnique({ where: { userId } })) || (await ensureWallet(userId));
 
   const where = {
     OR: [{ senderId: userId }, { receiverId: userId }, { walletId: wallet.id }],

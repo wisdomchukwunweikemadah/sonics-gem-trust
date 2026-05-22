@@ -77,3 +77,58 @@
   color: white;
   border-color: transparent;
 }
+
+.auth-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.5rem 0;
+}
+
+.verify-card {
+  text-align: center;
+}
+
+.verify-state {
+  padding: 1rem 0;
+}
+
+.verify-state.hidden {
+  display: none;
+}
+
+.verify-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 1rem;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.verify-icon.success {
+  background: rgba(0, 255, 153, 0.15);
+  color: var(--success);
+  border: 2px solid var(--success);
+}
+
+.verify-icon.error {
+  background: rgba(255, 77, 77, 0.12);
+  color: var(--danger);
+  border: 2px solid var(--danger);
+}
+
+.spinner-inline {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
